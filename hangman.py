@@ -1,13 +1,89 @@
 # importing required packages
 from english_words import english_words_alpha_set
 import random
+from PyDictionary import PyDictionary
+
+
+def display_hangman(tries):
+    stages = [  # final state: head, torso, both arms, and both legs
+                """
+                   --------
+                   |      |
+                   |      O
+                   |     \\|/
+                   |      |
+                   |     / \\
+                   -
+                """,
+                # head, torso, both arms, and one leg
+                """
+                   --------
+                   |      |
+                   |      O
+                   |     \\|/
+                   |      |
+                   |     / 
+                   -
+                """,
+                # head, torso, and both arms
+                """
+                   --------
+                   |      |
+                   |      O
+                   |     \\|/
+                   |      |
+                   |      
+                   -
+                """,
+                # head, torso, and one arm
+                """
+                   --------
+                   |      |
+                   |      O
+                   |     \\|
+                   |      |
+                   |     
+                   -
+                """,
+                # head and torso
+                """
+                   --------
+                   |      |
+                   |      O
+                   |      |
+                   |      |
+                   |     
+                   -
+                """,
+                # head
+                """
+                   --------
+                   |      |
+                   |      O
+                   |    
+                   |                   |
+                   -
+                """,
+                # initial empty state
+                """
+                   --------
+                   |      |
+                   |      
+                   |    
+                   |      
+                   |     
+                   -
+                """
+    ]
+    return stages[tries]
 
 
 def do_you_want_to_play():
     while True:
-        yn = input("Do you want to play hangman?? Y for yes, n for no").upper()
+        yn = input("Do you want to play hangman?? Y for yes, N for no").upper()
         if not(yn == "Y" or yn == "N"):
             print("Sorry, did not understand your response! Try again.")
+            continue
         elif yn == "Y":
             return True
         else:
@@ -25,57 +101,85 @@ def do_you_want_to_play_again():
             return False
 
 
+first_figure = (# initial empty state
+                """
+                   --------
+                   |      |
+                   |      
+                   |    
+                   |      
+                   |     
+                   -
+                """)
+
+
 def hangman():
     word_list = list(english_words_alpha_set)
     word = random.choice(word_list)
-    print(word)
-    word = word.upper()
     word_empty = list("_" * len(word))
-    word_letters = [i.upper() for i in word]
+    word_list = [i.upper() for i in word]
     guessed_letters = []
-    print(f"The encoded word is: {''.join(word_empty)}")
+    guessed_letters_correct = []
+    print(first_figure)
     tries = 6
-    guessed = True
-    while guessed and tries != 0:
-        guess = input("Take a guess:").upper()
-        if guess in word_letters:
-            guess_index = word_letters.index(guess)
-            word_letters[guess_index] = "-"
-            word_empty[guess_index] = guess
-            print("".join(word_empty))
-            guessed_letters.append(guess)
-            if "".join(guessed_letters) == word:
-                print("You have won the game! Congrats.")
+    print(f"The word has {len(word)} letters.")
+    try:
+        dict = PyDictionary()
+        n = 0
+        for type, meaning in dict.meaning(word).items():
+            print(f"The word is a {type}")
+            for i in meaning:
+                n += 1
+                print(f"The meaning(s) are: {n}.{i}")
+            print("\n")
+    except:
+        print("Sorry, no meaning available!!")
+    while tries != 0:
+        guess = input("Take a guess: ").upper()
+        guessed_letters.append(guess)
+        if guess in word_list:
+            guessed_letters_correct.append(guess)
+            word_index = word_list.index(guess)
+            word_list[word_index] = "-"
+            word_empty[word_index] = guess
+            print(f"Hoorah, {guess} is in the word!")
+            print(''.join(word_empty))
+            if tries > 0 and "".join(guessed_letters_correct) == word.upper():
+                print("\nHoorah, you have guessed the word!")
                 print(f"The word is {word}")
-                guessed = False
+                break
             else:
                 pass
-        elif len(word) == len(guess):
+        elif len(guess) == len(word):
             if guess == word:
-                print("Booyah! You won the game.")
-                print(f"The word is {word}")
-                guessed = False
+                print("\nHoorah, you guessed the word!")
+                print(f"\nThe word is {word}")
+                break
             else:
                 tries -= 1
-                print(f"Sorry, {guess} is not the word.")
-                continue
+                print(f"{guess} is not the word!")
+                print(f"You have {tries} tries left!")
         else:
             tries -= 1
-            print(f"Sorry, {guess} is not in the word.")
-            continue
+            print(f"{guess} is not in the word!")
+            print(f"You have {tries} tries left!")
+        print(display_hangman(tries))
     if tries == 0:
-        print("Out of turns, better luck next time!!")
-
+        print("Out of turns, better luck next time!")
+        print(f"The word was {word}")
 
 def main():
     while True:
         if do_you_want_to_play():
+            print("Let's play hangman!")
             hangman()
             if do_you_want_to_play_again():
                 hangman()
             else:
+                print("Have a great day ahead!")
                 break
         else:
+            print("Have a great day ahead!")
             break
 
 
